@@ -53,6 +53,30 @@ app.post("/workouts", async (req, res) => {
   }
 });
 
+// Delete a workout
+app.delete("/workouts/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const result = await pool.query(
+      "DELETE FROM workouts WHERE id = $1 RETURNING *",
+      [id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "Workout not found" });
+    }
+
+    res.json({
+      message: "Workout deleted successfully",
+      workout: result.rows[0]
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error deleting workout");
+  }
+});
+
 const PORT = process.env.PORT || 3001;
 
 app.listen(PORT, () => {
